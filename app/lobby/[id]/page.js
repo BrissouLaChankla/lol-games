@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import socketIO from 'socket.io-client';
 export default function page({ params }) {
     const { name, avatar, setRoomId, setIsJoining } = useStore();
-    const { players, playerJoin, playerLeave } = useStoreRoom();
+    const { players, updatePlayers } = useStoreRoom();
 
     const router = useRouter();
 
@@ -24,8 +24,13 @@ export default function page({ params }) {
         const socket = socketIO.connect('http://localhost:4000');
 
         socket.on('roomUsers', (data) => {
-            playerJoin(data)
+            updatePlayers(data)
         });
+
+
+        socket.on('userDisconnected', data => {
+            updatePlayers(data)
+        })
 
         socket.emit('joinRoom', {
             name,
