@@ -7,3 +7,12 @@
     text-wrap: balance;
   }
 }
+
+
+h2 {
+  @apply text-3xl py-4 font-semibold text-primary
+}
+
+h1 {
+  @apply text-4xl font-extrabold tracking-wide
+}
