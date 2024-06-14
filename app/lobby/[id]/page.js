@@ -1,10 +1,11 @@
 "use client";
 import { useStore } from "@/store/player";
 import { useStoreRoom } from "@/store/room";
+import { useSocketStore } from '@/store/useSocketStore';
 
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState, useRef } from "react";
-import socketIO from 'socket.io-client';
+
 
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -14,13 +15,16 @@ import { stringToAvatar } from "@/utils/avatar";
 export default function page({ params }) {
     const { name, avatar, roomId, setRoomId, setIsJoining, id, setId } = useStore();
     const { players, updatePlayers } = useStoreRoom();
+    const { connect, socket } = useSocketStore();
+
     const [loading, setLoading] = useState(false);
+
 
     const router = useRouter();
     const pathname = usePathname();
-    const socketRef = useRef(null);
 
     useEffect(() => {
+
 
         // Si tu n'as pas de nom c'est que tu join, on te redirige sur la home avec indication
         if (!!!name) {
@@ -30,11 +34,12 @@ export default function page({ params }) {
             return;
         }
 
-        const socket = socketIO.connect('http://localhost:4000');
-        socketRef.current = socket;
+        if (!socket) {
+            connect();
+            return;
+        }
 
         socket.on('storeOwnId', id => setId(id))
-
 
         socket.on('roomUsers', (data) => {
             updatePlayers(data)
@@ -55,10 +60,11 @@ export default function page({ params }) {
             roomId: params.id,
         })
 
+        // return () => {
+        //     disconnect();
+        // };
 
-        return (() => socket.disconnect())
-
-    }, [])
+    }, [socket])
 
     if (!!!players.length) {
         return <></>
@@ -67,9 +73,8 @@ export default function page({ params }) {
 
     const launchGame = () => {
         setLoading(true);
-        if (socketRef.current) {
-            socketRef.current.emit('askToStartGame', roomId);
-        }
+        socket.emit('askToStartGame', roomId);
+
     }
 
     console.log(players)
@@ -88,7 +93,8 @@ export default function page({ params }) {
                     <div className="grid place-items-center">
                         {
                             players[0].id === id ?
-                                <button className={`${(loading || players.length < 2) ? "btn-disabled" : "btn-primary"} btn btn-sm md:btn-md lg:btn-lg`} onClick={() => launchGame()}>
+                                // Ne pas oublier de replacer ce 0 par 2          ⬇️
+                                <button className={`${(loading || players.length < 0) ? "btn-disabled" : "btn-primary"} btn btn-sm md:btn-md lg:btn-lg`} onClick={() => launchGame()}>
                                     {loading ? <div className="loading loading-spinner loading-sm"></div> : "Lancer la partie"}
                                 </button>
                                 : `${players[0].name} doit lancer la partie `
