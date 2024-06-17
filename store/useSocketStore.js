@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import io from 'socket.io-client';
 
-const ADDRESS_BACK = process.env.ADDRESS_BACK || "http://localhost:4000"
+const ADDRESS_BACK = process.env.ADDRESS_BACK || "toto"
 
 
 export const useSocketStore = create((set) => ({
