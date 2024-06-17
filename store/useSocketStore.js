@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import io from 'socket.io-client';
 
+console.log(process.env.NEXT_PUBLIC_ADDRESS_BACK)
 export const useSocketStore = create((set) => ({
     socket: null,
     connect: () => set((state) => {
